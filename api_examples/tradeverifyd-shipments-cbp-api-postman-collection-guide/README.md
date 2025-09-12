@@ -1,4 +1,4 @@
-Title:** *Tradeverifyd Shipments \<\> CBP API – Postman Collection Guide*
+*Tradeverifyd Shipments \<\> CBP API – Postman Collection Guide*
 
 Introduction  
 ** This Postman collection provides access to the Tradeverifyd API for managing shipments, issuing verifiable credentials (VCs), and submitting them to CBP. It is designed to support NCAP testing and give Deacero hands-on access to the foundational endpoints.
@@ -10,18 +10,18 @@ Introduction
 
 ### Environment Setup (Required Before Use)
 To use the Postman collection, you’ll need to create a Postman environment with the following variables:
-  - **api-root-v1  
+  - **api-root-v1**  
       - **Type:** String  
       - **Example:** https://api.tradeverifyd.com/v1  
       - **Description:**** Root URL for the API.
-  - **api-key  
-      - **Type:**** Secret
+  - **api-key**
+      - **Type:** Secret
       - ***Value:*** Your Tradeverifyd API subscription key.
-      - **⚠️ Mark this variable as Secret in Postman. This prevents it from being accidentally exposed during screen shares or exports.  
-  - **(Optional) Runtime variables created during workflows:  
-      - **current\_shipment\_id  
-      - **current\_vc\_id  
-      - **vcs\_to\_submit\_to\_cbp
+      - **⚠️ Mark this variable as Secret in Postman. This prevents it from being accidentally exposed during screen shares or exports.** 
+  - **(Optional) Runtime variables created during workflows:**
+      - **current\_shipment\_id**  
+      - **current\_vc\_id**  
+      - **vcs\_to\_submit\_to\_cbp**
 ### Key API Flows
 #### 1. Shipments
 Create Shipment  
@@ -30,38 +30,37 @@ Example body:
   
 {
 
-"shipment\_name": "Deacero Test Shipment 1",
+"shipment\_name": "Tradeverifyd Test Shipment 1",
 
 "status": "Created",
 
-"organizational\_units": \["deacero"\]
+"organizational\_units": \["engproc"\]
 
 }
 
   - 
-  - **Get All Shipments  
+  - **Get All Shipments** 
     GET {{api-root-v1}}/shipments
 
-  - **Get Shipment by ID  
+  - **Get Shipment by ID** 
     GET {{api-root-v1}}/shipments/{{current\_shipment\_id}}
 
 #### 2. Upload Documents
-  - **Upload Document to Shipment  
+  - **Upload Document to Shipment**
     POST {{api-root-v1}}/shipment/{{current\_shipment\_id}}/upload
     
       - Form-data: file + path
     
-      - *Currently supports document association; auto-VC issuance is being built.  
-        *
+      - *Currently supports document association; auto-VC issuance is being built.*
 
 #### 3. Verifiable Credentials
-  - **Get All VCs for Shipment  
+  - **Get All VCs for Shipment** 
     GET {{api-root-v1}}/credentials/list/shipment/{{current\_shipment\_id}}
 
-  - **Get VC Details  
+  - **Get VC Details**  
     GET {{api-root-v1}}/credentials/details/{{current\_vc\_id}}
 
-  - **Get VC Details as PDF  
+  - **Get VC Details as PDF** 
     GET {{api-root-v1}}/credentials/details/{{current\_vc\_id}}/pdf
 
 #### 4. CBP Integration
