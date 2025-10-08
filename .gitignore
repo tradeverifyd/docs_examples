@@ -1,0 +1,3 @@
+# Ignore the conversion staging area entirely; keep its own .gitignore
+actual_docs_to_be_converted/*
+!actual_docs_to_be_converted/.gitignore

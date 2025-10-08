@@ -1,0 +1,6 @@
+# Ignore extracted assets and temporary conversion outputs
+assets/
+pdf-md-*/
+*.html
+*.tmp
+*.log
