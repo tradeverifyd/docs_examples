@@ -1,0 +1,189 @@
+# **Entity Search and Graph Retrieval – Best Practice Use Pattern**
+
+## **Introduction**
+
+This document outlines the recommended workflow for searching entities and retrieving relationship graphs using Tradeverifyd’s APIs. It demonstrates how to effectively combine the GET /v1/search/entities and GET /v1/entities/{entity_id}/graph endpoints to identify entities and visualize their relationship networks.
+
+---
+
+## **Background**
+
+The Entity Search and Entity Graph endpoints allow users to:
+
+- Find * `entities` by * `name` or * `entity_id`
+
+- Retrieve relationship graphs showing linked entities (e.g., suppliers, subsidiaries, or related organizations)
+
+These endpoints are key for uncovering ownership structures, supply chain dependencies, and cross-jurisdictional connections within Tradeverifyd’s database.
+
+
+---
+
+## **Recommended Use Pattern**
+
+To ensure efficient and accurate relationship retrieval, follow this workflow:
+
+1. **Search for Entities**
+    Call `GET /v1/search/entities` with parameters such as `name` or `entity_id` to locate the relevant entities.
+    → This provides a list of matching entities that can be cached locally for UI or programmatic use.
+
+2. **Select the Correct Entity**
+    From the search results, identify and select the desired entity record.
+    → Capture its entity_id, jurisdiction, and name for graph visualization.
+
+3. **Retrieve Entity Graph**
+    Pass the selected `entity_id` into the `GET /v1/entities/{entity_id}/graph` endpoint.
+    → This returns a graph structure representing direct and indirect relationships between entities.
+
+## **Example Workflow**
+## **Step 1 – Search Entities**
+
+**Request:**
+
+```shell
+curl -X GET "https://api.tradeverifyd.com/v1/search/entities?name=GLOBAL%20TECH%20SOLUTIONS%20INCORPORATED" \
+  -H "accept: application/json" \
+  -H "ocp-apim-subscription-key: <your_api_key>"
+```
+
+**Sample Response (Trimmed Example):**
+```json
+[
+  {
+    "id": "507f1f77bcf86cd799439011",
+    "name": "GLOBAL TECH SOLUTIONS INCORPORATED",
+    "jurisdiction": "US",
+    "addresses": [
+      "New York, US-NY, US"
+    ],
+    "flagged": false,
+    "references": {
+      "flags": { "total": 0 },
+      "relationships": {
+        "total": 2,
+        "from_relationships": { "count": 1 }
+      }
+    }
+  }
+]
+```
+
+## **Best Practices**
+
+Cache results for 12–24 hours to reduce repeated API calls.
+
+1. Invalidate cache on user action (e.g., refresh button) or deployment events.
+
+2. Filter client-side by id, name, jurisdiction, or relationship type to enhance performance and user experience.
+
+## **Step 2 – Retrieve Entity Graph**
+
+Once an entity is selected, retrieve its relationship graph.
+
+**Request:**
+
+```shell
+curl -X GET "https://api.tradeverifyd.com/v1/entities/507f1f77bcf86cd799439011/graph" \
+  -H "accept: application/json" \
+  -H "ocp-apim-subscription-key: <your_api_key>"
+
+```
+
+**Sample Response (Trimmed Example):**
+```json
+{
+  "entities": [
+    {
+      "id": "507f1f77bcf86cd799439012",
+      "jurisdiction": "CN",
+      "name": "Global Imports Inc."
+    },
+    {
+      "id": "507f1f77bcf86cd799439013",
+      "jurisdiction": "UK",
+      "name": "Euro-Logistics PLC"
+    }
+  ],
+  "entity_graph_counts": [
+    {
+      "child_count": 5,
+      "entity_id": "507f1f77bcf86cd799439011",
+      "flag_count": 2,
+      "relationship_count": 8
+    }
+  ],
+  "entrypoint": {
+    "id": "507f1f77bcf86cd799439011",
+    "jurisdiction": "US",
+    "name": "Acme Global Corp."
+  },
+  "page": 0,
+  "page_size": 100,
+  "records": 2,
+  "relationships": [
+    {
+      "id": "rel_001",
+      "source": "507f1f77bcf86cd799439011",
+      "target": "507f1f77bcf86cd799439012",
+      "type": "RELATED_TO",
+      "hs_codes": ["1234", "5678"]
+    },
+    {
+      "id": "rel_002",
+      "source": "507f1f77bcf86cd799439011",
+      "target": "507f1f77bcf86cd799439013",
+      "type": "RELATED_TO",
+      "hs_codes": ["9012"]
+    }
+  ]
+}
+```
+## **Query Parameters**
+
+| Parameter   | Type   | Default | Description                                          |
+| ----------- | ------ | ------- | ---------------------------------------------------- |
+| `hs_code`   | string | —       | Comma-separated list of HS codes to filter by        |
+| `depth`     | int    | 3       | Limits how many levels of relationships are explored |
+| `page`      | int    | 1       | Current pagination index                             |
+| `page_size` | int    | 1000    | Number of records returned per page                  |
+| `direction` | string | `in`    | Graph direction from root entity                     |
+
+
+## **Response Structure**
+
+The response includes:
+
+Entities – List of related `entities` with `names` and `jurisdictions`
+
+Relationships – Connections and relationship types between entities
+
+Graph Counts – Summary metrics such as number of relationships and child entities
+
+Pagination Metadata – Includes page, page size, and total records
+
+⚠️ Note: This endpoint does not return flag or risk event data. Use `/v1/flags` and `/v1/risk_events` to retrieve those details.
+
+## **API-Only Usage (No UI)**
+
+For backend integrations or API-only applications:
+
+Identify the `entity_id` programmatically from `/v1/search/entities`.
+
+Pass it directly into `/v1/entities/{entity_id}/graph`.
+
+No caching or UI selection logic is required.
+
+## **Frequently Asked Questions (FAQ)**
+
+**Q: Why should I cache entity search results?
+ A: Caching avoids repeated network calls for frequently queried entities, improves performance, and reduces API rate consumption. Refresh only when needed—like when users manually request an update or after a new deployment.
+
+**Q: Does the entity graph include flag or risk data?
+ A: No. The `/v1/entities/{entity_id}/graph` endpoint focuses solely on structural relationships. To obtain compliance or risk details, query the `/v1/flags` or `/v1/risk_events` endpoints using the same `entity_id`.
+
+**Q: How deep can I traverse the relationship graph?
+ A: You can control this using the depth parameter. The default is 3, which captures most relevant entity relationships. For large corporate networks, increasing depth provides more context—but can also return a much larger dataset.
+
+**Q: What if an entity I expect doesn’t appear in the graph?
+ A: Double-check that the entity is resolved correctly and the relationship direction (in or out) matches your intent. Some relationships are directional or may be filtered out by jurisdiction or HS-code parameters.
+
