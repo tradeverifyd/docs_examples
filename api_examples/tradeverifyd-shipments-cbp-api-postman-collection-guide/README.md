@@ -47,7 +47,7 @@ Example body:
 
 #### 2. Upload Documents
   - **Upload Document to Shipment**
-    POST {{api-root-v1}}/shipment/{{current\_shipment\_id}}/upload
+    POST {{api-root-v1}}/shipment/{{current_shipment_id}}/upload
     
       - Form-data: file + path
     
@@ -55,33 +55,33 @@ Example body:
 
 #### 3. Verifiable Credentials
   - **Get All VCs for Shipment** 
-    GET {{api-root-v1}}/credentials/list/shipment/{{current\_shipment\_id}}
+    GET {{api-root-v1}}/credentials/list/shipment/{{current_shipment_id}}
 
   - **Get VC Details**  
-    GET {{api-root-v1}}/credentials/details/{{current\_vc\_id}}
+    GET {{api-root-v1}}/credentials/details/{{current_vc_id}}
 
   - **Get VC Details as PDF** 
-    GET {{api-root-v1}}/credentials/details/{{current\_vc\_id}}/pdf
+    GET {{api-root-v1}}/credentials/details/{{current_vc_id}}/pdf
 
 #### 4. CBP Integration
 Submit VCs to CBP  
-POST {{api-root-v1}}/us\_customs/submit\_presentation  
+POST {{api-root-v1}}/us_customs/submit_presentation  
 Example body:  
   
 {
 
-"shipment\_id": "{{current\_shipment\_id}}",
+"shipment_id": "{{current_shipment_id}}",
 
-"credential\_ids": \["{{current\_vc\_id}}"\]
+"credential_ids": ["{{current_vc_id}}"]
 
 }
 
   - 
   - **Get CBP Status for VC  
-    GET {{api-root-v1}}/shipments/{{current\_shipment\_id}}/cbps/{{current\_vc\_id}}
+    GET {{api-root-v1}}/shipments/{{current_shipment_id}}/cbps/{{current_vc_id}}
 
   - **Get All CBP Statuses for Shipment  
-    GET {{api-root-v1}}/shipments/{{current\_shipment\_id}}/cbps
+    GET {{api-root-v1}}/shipments/{{current_shipment_id}}/cbps
 
 ### Workflow Example
 1.  Create a shipment.
